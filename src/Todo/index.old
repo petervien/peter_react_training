@@ -1,0 +1,154 @@
+import React, { useEffect, useState } from 'react';
+import styled from 'styled-components';
+import { FILTET_TYPE_ALL, FILTET_TYPE_COMPLETED, FILTET_TYPE_PENDING } from '../constants';
+
+const Form = styled.form`
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  
+`;
+
+const Label = styled.label`
+  color: green;
+  font-size: 2rem;
+  flex-grow: 1;
+  flex-basis: 100%;
+  text-align: center;
+`;
+
+const Submit = styled.input`
+  flex-basis: 25%;
+`;
+
+const Field = styled.input`
+  flex-grow: 1;
+`;
+
+const Container = styled.div`
+/*
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  */
+`;
+
+const TodoContainer = styled.div`
+  display: flex;
+  padding: 20px 0;
+
+  &:nth-child(odd) {
+    background: #eee;
+  }
+`;
+
+const TodoCheckbox = styled.input`
+  flex-grow: 1;
+`;
+
+const TodoText = styled.h3`
+  flex-grow: 4;
+  padding: 0 10px;
+  margin: 0;
+  text-decoration: ${(props) => (props.isDone ? 'line-through' : 'none')};
+`;
+
+const TodoDelete = styled.input`
+  flex-grow: 1;
+`;
+
+const FooterFilters = styled.div`
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  display: flex;
+  
+  input {
+    flex-grow: 1;
+    height: 64px;
+  }
+`;
+
+const index = () => {
+  const [todoText, setTodoText] = useState('');
+  const [todoList, setTodoList] = useState([]);
+  const [filterType, setFilterType] = useState(FILTET_TYPE_ALL);
+
+  useEffect(() => () => {
+  }, []);
+
+  const onChangeText = (event) => {
+    setTodoText(event.target.value);
+  };
+
+  const addTodo = (event) => {
+    event.preventDefault();
+    const newTodo = [
+      { todoText, isDone: false, id: new Date().valueOf() },
+      ...todoList,
+    ];
+    setTodoList(newTodo);
+    setTodoText('');
+  };
+
+  const completeTodo = (todoItem) => {
+    const updatedTodoList = todoList.map((todo) => {
+      if (todo.id === todoItem.id) {
+        return { ...todo, isDone: !todo.isDone };
+      }
+      return todo;
+    });
+    setTodoList(updatedTodoList);
+  };
+
+  const deleteTodo = (todoItem) => {
+    const i = todoList.findIndex((todo) => todo.id === todoItem.id);
+    const updatedTodoList = [
+      ...todoList.slice(0, i),
+      ...todoList.slice(i + 1),
+    ];
+    setTodoList(updatedTodoList);
+  };
+
+  return (
+    <Container>
+      <h1>Todo App</h1>
+      <div>
+        <Form onSubmit={addTodo}>
+          <Label htmlFor="addTask">Add Task</Label>
+          <Field id="addTask" placeholder="Write your task here..." type="text" value={todoText} onChange={onChangeText} />
+          <Submit type="submit" value="Add Todo" />
+        </Form>
+      </div>
+      <div>
+        <For
+          each="todo"
+          of={todoList.filter((x) => {
+            if (filterType === FILTET_TYPE_COMPLETED) {
+              return x.isDone === true;
+            } if (filterType === FILTET_TYPE_PENDING) {
+              return x.isDone === false;
+            }
+            return true;
+          })}
+        >
+          <TodoContainer
+            key={todo.id}
+          >
+            <TodoCheckbox type="checkbox" value={todo.isDone} onChange={() => completeTodo(todo)} />
+            <TodoText isDone={todo.isDone}>{todo.todoText}</TodoText>
+            <TodoDelete type="button" value="Delete" onClick={() => deleteTodo(todo)} />
+          </TodoContainer>
+        </For>
+        <FooterFilters>
+          <input type="button" value="All Tasks" onClick={() => setFilterType(FILTET_TYPE_ALL)} />
+          <input type="button" value="Pending Tasks" onClick={() => setFilterType(FILTET_TYPE_PENDING)} />
+          <input type="button" value="Completed Tasks" onClick={() => setFilterType(FILTET_TYPE_COMPLETED)} />
+        </FooterFilters>
+      </div>
+    </Container>
+  );
+};
+
+export default index;
